@@ -9,8 +9,8 @@ if [ "${ROBOT_HARDWARE:-}" != "virtual" ] || [ "${ROBOT_TYPE:-}" != "duckiedrone
     echo "PX4 SITL is only supported on virtual duckiedrone robots."
     echo "  ROBOT_HARDWARE=${ROBOT_HARDWARE:-<unset>}"
     echo "  ROBOT_TYPE=${ROBOT_TYPE:-<unset>}"
-    echo "Exiting without starting PX4 SITL."
-    exit 0
+    echo "Sleeping indefinitely instead of starting PX4 SITL."
+    sleep infinity
 fi
 
 LOG_FILE=/var/log/px4_sitl.log
