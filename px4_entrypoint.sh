@@ -1,6 +1,18 @@
 #!/bin/sh
 set -eu
 
+# Guard: only start PX4 SITL on virtual duckiedrone robots
+ROBOT_TYPE=$(head -1 /data/config/robot_type 2>/dev/null || echo "")
+ROBOT_HARDWARE=$(head -1 /data/config/robot_hardware 2>/dev/null || echo "")
+
+if [ "${ROBOT_HARDWARE:-}" != "virtual" ] || [ "${ROBOT_TYPE:-}" != "duckiedrone" ]; then
+    echo "[dt-px4] WARNING: PX4 SITL is only supported on virtual duckiedrone robots."
+    echo "[dt-px4]   ROBOT_HARDWARE=${ROBOT_HARDWARE:-<unset>}"
+    echo "[dt-px4]   ROBOT_TYPE=${ROBOT_TYPE:-<unset>}"
+    echo "[dt-px4] Sleeping indefinitely instead of starting PX4 SITL."
+    sleep infinity
+fi
+
 LOG_FILE=/var/log/px4_sitl.log
 
 mkdir -p "$(dirname "$LOG_FILE")"
