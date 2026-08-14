@@ -169,14 +169,19 @@ COPY --from=builder /workspaces/PX4-Autopilot/ROMFS ./ROMFS
 COPY --from=builder /workspaces/PX4-Autopilot/px4_entrypoint.sh /usr/local/bin/px4_entrypoint.sh
 COPY --from=builder /workspaces/PX4-Autopilot/px4_healthcheck.sh /usr/local/bin/px4_healthcheck.sh
 
-RUN chmod +x /usr/local/bin/px4_entrypoint.sh /usr/local/bin/px4_healthcheck.sh && \
+# Only virtual Duckiedrones need PX4 SITL.
+COPY --from=builder /workspaces/PX4-Autopilot/dt-px4-gate-entrypoint.sh /usr/local/bin/dt-px4-gate-entrypoint.sh
+COPY --from=builder /workspaces/PX4-Autopilot/dt-px4-gate-healthcheck.sh /usr/local/bin/dt-px4-gate-healthcheck.sh
+
+RUN chmod +x /usr/local/bin/px4_entrypoint.sh /usr/local/bin/px4_healthcheck.sh \
+        /usr/local/bin/dt-px4-gate-entrypoint.sh /usr/local/bin/dt-px4-gate-healthcheck.sh && \
     ldd ./build/px4_sitl_default/bin/px4
 
 # Healthcheck:
 # - Healthy once "Waiting for simulator to accept connection on TCP port 4560" appears
 # - Unhealthy if "poll timeout" appears AFTER "Ready for takeoff!"
 HEALTHCHECK --interval=20s --timeout=5s --start-period=60s --retries=1 \
-    CMD /usr/local/bin/px4_healthcheck.sh
+    CMD /usr/local/bin/dt-px4-gate-healthcheck.sh
 
 # Use wrapper so we can tee PX4 output to a log file
-ENTRYPOINT ["/usr/local/bin/px4_entrypoint.sh"]
+ENTRYPOINT ["/usr/local/bin/dt-px4-gate-entrypoint.sh"]
